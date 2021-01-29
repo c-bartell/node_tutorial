@@ -45,3 +45,45 @@ app.get('/api/v1/footnotes', (request, response) => {
       response.status(500).json({ error });
     });
 });
+
+// Add a paper to the db:
+app.post('/api/v1/papers', (request, response) => {
+  const paper = request.body;
+
+  for (let requiredParameter of ['title', 'author']) {
+    if (!paper[requiredParameter]) {
+      return response
+        .status(422)
+        .send({  error: `Expected format: { title: <String>, author: <String> }. You're missing a "${requiredParameter}" property.` });
+    }
+  }
+
+  database('papers').insert(paper, 'id')
+    .then(paper => {
+      response.status(201).json({ id: paper[0] })
+    })
+    .catch(error => {
+      response.status(500).json({ error });
+    });
+});
+
+// Add a footnote to the db:
+app.post('/api/v1/footnotes', (request, response) => {
+  const footnote = request.body;
+
+  for (let requiredParameter of ['note', 'paper_id']) {
+    if (!footnote[requiredParameter]) {
+      return response
+        .status(422)
+        .send({ error: `Expected format: { note: <String>, paper_id: <Integer> } You're missing a "${requiredParameter}" property.` });
+    }
+  }
+
+  database('footnotes').insert(footnote, 'id')
+    .then(footnote => {
+      response.status(201).json({ id: footnote[0] })
+    })
+    .catch(error => {
+      response.status(500).json({ error });
+    });
+});
